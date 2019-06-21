@@ -1,0 +1,549 @@
+<html>
+<head>
+	<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+<style>
+	@font-face {
+	    font-family: norwester;
+	    src: url("norwester.otf") format("opentype");
+	}
+
+	body{
+		background-color: black;
+		width:100%;
+		height: 100%;
+		margin: 0px;
+		font-family: norwester;
+    	color:white;
+    	font-size: 20px;
+    	overflow: hidden;
+	}
+
+/**/
+	#begin{
+		border-bottom: 4px solid #CC3333;
+		width:100%;
+	}
+
+	#begin span{
+		background: black;
+	    position: relative;
+	    top: 13px;
+	    padding: 15px;
+	}
+
+/**/
+	.rhsTapLine{
+		border-bottom: 4px solid #CC3333;
+		width:100%;
+		position: relative;
+		transition: right ease-in-out 0.1s; /*For non fullscreen slide out animations*/
+		right:0px;
+	}
+
+	.rhsTapLine .rhsText{
+    background: black;
+    position: absolute;
+    top: -35px;
+    padding: 15px;
+    right: 15px;
+    font-size: 33px;
+	}
+
+	.rhsTapLine .lhsText{
+	background: black;
+    position: absolute;
+    top: -34px;
+    padding: 11px;
+    left: 12px;
+    font-size: 16px;
+	}
+
+	#wrapper{
+	    text-align: center;
+	    width: 100%;
+	    height: 100%;
+	}
+
+	#title{
+	    color: white;
+	    display: inline-block;
+	    height: 55%;
+	}
+
+	.simpleImage{
+		width: 100%;
+		top: 33%;
+		position: relative;
+	}
+
+	.graveYard{
+		position: absolute;
+		bottom: 3px;
+		left: 50%;
+		width: 80px;
+		transform: translateX(-40px);
+	}
+
+
+/* each screen has this class */
+	.screen{
+		width:100%;
+		height: 100%;
+		position: absolute;
+		right:0%;
+		top:0%;
+		transition: right ease-in-out 0.1s;
+	}
+
+	.exit {
+	  right: 100%;
+	}
+
+	.offScreen{
+		right:-100%;
+	}
+
+	.textScreenHeading{
+	    padding-top: 30px;
+	    padding: 15px;
+	    font-size: 22px;
+	    text-align: left;
+   	}
+
+	.textScreenBody{
+    text-align: left;
+    padding: 15px 25px 15px 15px;
+    font-size: 19px;
+	}
+
+	.textDisplay{
+		height: 40%;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+	}
+
+	.textWrapper{
+		position: absolute;
+		bottom: 0px;
+	}
+
+
+
+/* GAME STUFF*/
+
+	#gameScreen{
+		background-color: black;
+	}
+
+	.mapCell{
+		text-align: center;
+    line-height: 80px;
+    font-size: 60px;
+    font-family: sans-serif;
+    /* position: absolute; */
+    border: 4px solid white;
+    opacity: 0.6;
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+    min-height: 80px;
+    display: inline-block;
+    margin: 4px;
+	}
+
+	#mapWrapper{
+    height: 60%;
+    width: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    text-align: initial;
+	}
+
+	#map{
+		width: 10000px;
+    height: 10000px;
+    overflow: hidden;
+    left: 0px;
+    position: relative;
+    top: 0px;
+    transition: 0.1s ease-in-out;
+
+  }
+
+  .row{
+  	display: flex;
+  }
+
+  .canMoveCell{
+  	border-color:white;
+  	opacity: 1.0;
+  }
+
+
+</style>
+
+
+</head>
+
+<body>
+
+<div id='wrapper'>
+
+
+<!-- First Screen -->
+<div id='TitleScreen' class='screen'>
+	<div id='title'>
+		<img class='simpleImage' src='Title.png'>
+	</div>
+	<div id='begin'>
+		<span>TAP TO BEGIN</span>
+	</div>
+	<img class='graveYard' src='Graveyard.png'>
+</div>
+
+<!-- Second Screen -->
+<div id='OpeningScreen' class='screen textScreen offScreen'>
+	<div class='textDisplay'>
+		<div class='textWrapper'>
+			<div class='TextScreenHeading'>
+				You enter the dungeon...
+			</div>
+			<div id='openingText' class='TextScreenBody'>
+				The foul stench of dead adventurers seeps from the depths. The legend that lured them in is what has brought you here and as the light from the outside fades, so too does your hope to ever return. Unless the legend is true...
+			</div>
+			<div id='secondText' class='TextScreenBody'>
+				The floor is wet with what you assume is dirty water. The damp air makes it slightly hard to breathe, but you know that this is the least of your concerns.
+			</div>
+		</div>
+	</div>
+	<div class='rhsTapLine'>
+		<span class='rhsText'>Next</span>
+	</div>
+</div>
+
+<!-- Third Screen -->
+<div id='GameScreen' class='screen offScreen'>
+	<div id='mapWrapper'>
+		<div id='map'>
+			<!-- Map Tiles go here -->
+
+		</div>
+		<div class='rhsTapLine' id='tapAdjacentHint'>
+			<span class='lhsText'>Tap On Adjacent </br> tiles to move</span>
+			<span class='rhsText'>Got It!</span>
+		</div>
+	</div>
+</div>
+
+</div>
+
+</body>
+
+
+<script>
+
+
+$(document).ready(function(){
+	//Prep
+	$("#secondText").hide();
+
+	//First Screen
+	$( "#begin" ).mouseup(function() {
+	  $("#TitleScreen").addClass( "exit");
+	  $("#OpeningScreen").removeClass( "offScreen");
+	  rpgText($("#OpeningScreen .textWrapper"),$("#OpeningScreen .TextScreenHeading"), $("#OpeningScreen #openingText"));
+	  // rpgText($("#OpeningScreen .textWrapper"),$("#OpeningScreen .TextScreenHeading"), $("#OpeningScreen #openingText"));
+	});
+
+
+	// Second Screen Next button
+	$( "#OpeningScreen .rhsTapLine" ).click(function() {
+		$("#secondText").show();
+		rpgText($("#OpeningScreen .textWrapper"), null, $("#OpeningScreen #secondText"));
+		$(this).unbind('click');
+		$( "#OpeningScreen .rhsTapLine span").text("Close");
+		$(this).click(third);
+	});
+
+	function third(){
+
+		$("#OpeningScreen").addClass( "exit");
+		$("#GameScreen").removeClass( "offScreen");
+		game();
+
+		// get rid of hint
+		$('#tapAdjacentHint').click(function() {
+				$(this).addClass('exit');
+			});
+		}
+
+		//Third Screen
+
+
+});
+
+
+var map;
+
+// Game Code
+function game(){
+	var player = {};
+	game.player = player;
+	player.pos = new Vec2(25,25);
+
+	game.redraw = function(){
+		updateMapView();
+	}
+
+	player.move = function(x,y){
+		player.pos.x += x;
+		player.pos.y += y;
+		game.redraw();
+	}
+
+	player.left = function(){
+		player.move(-1,0);
+	}
+
+	player.up = function(){
+		player.move(0,-1);
+	}
+
+	player.right = function(){
+		player.move(1,0);
+	}
+
+	player.down = function(){
+		player.move(0,1);
+	}
+
+	gameSetup(game);
+	play(map);
+}
+
+
+function updateMapView(){
+	for (i = 0; i < game.mapView.x; i++){
+		for (j = 0; j < game.mapView.y; j++){
+			here = new Vec2(i,j);
+			current = here.cell();
+			current.attr('class', 'mapCell');
+			// Cell logic
+			if(player.pos.x == i && player.pos.y == j){
+				current.text("@");
+			}else{
+				current.text(map.get();
+			}
+
+			d = player.pos.distanceTo(here);
+			if(d <= 1) {
+				current.addClass('canMoveCell');
+			}
+		}
+	}
+	cameraTo(player.pos.x, player.pos.y);
+}
+
+// Map
+class GameMap {
+	constructor(x,y){
+		createLevelArray(x,y)
+	}
+}
+
+class Tile{
+	constructor(){
+
+	}
+}
+
+// Vector Helpers
+class Vec2 {
+
+	constructor(x,y){
+		this.x = x;
+		this.y = y;
+	}
+
+	distanceTo(v){
+		var dx = v.x - this.x;
+		var dy = v.y - this.y;
+		return Math.pow(dx,2) + Math.pow(dy,2);
+	}
+
+	cell(){
+		$('#cell_' + this.x + '_' + this.y);
+	}
+}
+
+// center view on square x,y
+function cameraTo(x,y){
+	spacing = {};
+	spacing.initialOffset = {};
+	spacing.initialOffset.x = 149;
+	spacing.initialOffset.y = 200;
+	spacing.x = -96;
+	spacing.y = -96;
+	$('#map').css({'left': x*spacing.x + spacing.initialOffset.x + 'px',
+		'top': y*spacing.y + spacing.initialOffset.y + 'px'});
+}
+
+function gameSetup(game){
+	player = game.player;
+	map = new GameMap(50,50);
+	buildMapView(50, 50);
+
+	// Bind Keys
+	$(document).keydown(function(e) {
+	    switch(e.which) {
+	        case 37: // left
+	        player.left();
+	        break;
+
+	        case 38: // up
+	        player.up();
+	        break;
+
+	        case 39: // right
+	        player.right();
+	        break;
+
+	        case 40: // down
+	        player.down();
+	        break;
+
+	        default: return; // exit this handler for other keys
+	    }
+	    e.preventDefault(); // prevent the default action (scroll / move caret)
+	});
+}
+
+function buildMapView(x, y){
+game.mapView = {};
+game.mapView.x = x;
+game.mapView.y = y;
+
+	for (iy = 0; iy < y; iy++){
+		var myRow = $('<div></div>');
+		myRow.attr('id', 'row_' + iy);
+		myRow.addClass('row');
+		$("#map").append(myRow);
+		for (jx = 0; jx < x; jx++){
+			var myCell = $('<div></div>');
+			myCell.attr('id', 'cell_' + jx + '_' + iy);
+			myCell.addClass('mapCell');
+			$("#row_" + iy).append(myCell);
+		}
+	}
+}
+
+function play(map){
+// TODO:
+}
+
+function showMap(map){
+	mapStr = "";
+	for(i = 0; i < map.length; i++ ){
+		for(j = 0; j < map[i].length; j++){
+			mapStr += map[i][j];
+		}
+		mapStr += '\n';
+	}
+	return mapStr;
+}
+
+function createLevelArray(x, y){
+	// create 3D
+	arr = new Array();
+	for (i = 0; i < x; i++) {
+		arr[i]= new Array();
+		for (j = 0; j < y; j++) {
+			arr[i][j] = "X";
+		}
+	}
+	return arr
+}
+
+// UTILTITIES
+
+// Typing delays in milliseconds.
+var textDelay = 5; //delay between each letter
+var speedBetweenLines = 400; //delay between heading and main text
+
+// Fix size so typing doesn't resize element
+function fixDimensions(e){
+  e.width(e.width());
+  e.height(e.height());
+}
+
+// UnFix dimensions so window resizing works again.
+function unFixDimensions(e){
+  e.width("");
+  e.height("");
+}
+
+function rpgText(element, heading, body){
+  //Fix Height
+  fixDimensions(element);
+
+  if(heading != null){
+  	headingText = heading.text();
+  	heading.text("");
+  }
+
+  bodyText = body.text();
+  body.text("");
+
+  if(heading != null){
+	  typeWriter(headingText, heading, function(){
+	  	setTimeout(typeBody(element), speedBetweenLines);
+		});
+	} else {
+		typeBody(element);
+	}
+
+  function typeBody(element){
+    typeWriter(bodyText, body, function(){
+			unFixDimensions(element);
+    });
+  };
+
+}
+
+function typeWriter(str, target, callback){
+  quickType(str, target, 0, callback);
+}
+
+function quickType(str, target, i, callback) {
+    // If full string hasn't yet been typed out, continue typing
+    if (i < str.length) {
+        target.text(target.text() + str.charAt(i));
+        i++;
+        setTimeout(function(){ quickType(str, target, i, callback); }, textDelay);
+    } else {
+      // Done so callback time
+      if(callback)
+        callback();
+    }
+}
+
+
+function XOR(a, b){
+	return	( a || b ) && !( a && b )
+}
+
+function AND(a, b){
+	return	( a || b ) && !( a && b )
+}
+
+</script>
+
+
+</html>
