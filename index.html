@@ -339,7 +339,7 @@ function updateMapView(){
 			if(player.pos.x == i && player.pos.y == j){
 				current.text("@");
 			}else{
-				current.text(map.get();
+				current.text(map.get(here).symbol);
 			}
 
 			d = player.pos.distanceTo(here);
@@ -352,15 +352,25 @@ function updateMapView(){
 }
 
 // Map
-class GameMap {
+class GameMap extends Array{
 	constructor(x,y){
-		createLevelArray(x,y)
+		super();
+		for (var i = 0; i < x; i++) {
+			this[i] = new Array();
+			for (var j = 0; j < y; j++) {
+				this[i][j] = new Tile('x');
+			}
+		}
+	}
+
+	get(v){
+		return this[v.x][v.y];
 	}
 }
 
 class Tile{
-	constructor(){
-
+	constructor(symbol){
+		this.symbol = symbol;
 	}
 }
 
@@ -379,7 +389,7 @@ class Vec2 {
 	}
 
 	cell(){
-		$('#cell_' + this.x + '_' + this.y);
+		return $('#cell_' + this.x + '_' + this.y);
 	}
 }
 
@@ -457,18 +467,6 @@ function showMap(map){
 		mapStr += '\n';
 	}
 	return mapStr;
-}
-
-function createLevelArray(x, y){
-	// create 3D
-	arr = new Array();
-	for (i = 0; i < x; i++) {
-		arr[i]= new Array();
-		for (j = 0; j < y; j++) {
-			arr[i][j] = "X";
-		}
-	}
-	return arr
 }
 
 // UTILTITIES
