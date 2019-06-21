@@ -4,12 +4,18 @@
   src="https://code.jquery.com/jquery-3.4.1.min.js"
   integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
   crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/rot-js@2/dist/rot.js"></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 
 <style>
 	@font-face {
 	    font-family: norwester;
 	    src: url("norwester.otf") format("opentype");
+	}
+
+	@font-face {
+	    font-family: yetd;
+	    src: url("YETD_Font.ttf") format("truetype");
 	}
 
 	body{
@@ -133,6 +139,11 @@
 		bottom: 0px;
 	}
 
+	.mapCell.wall {
+    color: black;
+    border: 4px solid transparent;
+  }
+
 
 
 /* GAME STUFF*/
@@ -145,7 +156,7 @@
 		text-align: center;
     line-height: 80px;
     font-size: 60px;
-    font-family: sans-serif;
+    font-family: 'yetd';
     /* position: absolute; */
     border: 4px solid white;
     opacity: 0.6;
@@ -155,6 +166,7 @@
     min-height: 80px;
     display: inline-block;
     margin: 4px;
+
 	}
 
 	#mapWrapper{
@@ -184,6 +196,10 @@
   .canMoveCell{
   	border-color:white;
   	opacity: 1.0;
+  }
+
+  .fail{
+  	color:red;
   }
 
 
@@ -276,7 +292,7 @@ $(document).ready(function(){
 
 		$("#OpeningScreen").addClass( "exit");
 		$("#GameScreen").removeClass( "offScreen");
-		game();
+		new game();
 
 		// get rid of hint
 		$('#tapAdjacentHint').click(function() {
@@ -286,91 +302,251 @@ $(document).ready(function(){
 
 		//Third Screen
 
-
 });
 
 
 var map;
+var player = {};
 
 // Game Code
-function game(){
-	var player = {};
-	game.player = player;
-	player.pos = new Vec2(25,25);
-
-	game.redraw = function(){
-		updateMapView();
+class game{
+	constructor(){
+			gameSetup(game);
+			play(map);		
 	}
 
-	player.move = function(x,y){
-		player.pos.x += x;
-		player.pos.y += y;
-		game.redraw();
-	}
-
-	player.left = function(){
-		player.move(-1,0);
-	}
-
-	player.up = function(){
-		player.move(0,-1);
-	}
-
-	player.right = function(){
-		player.move(1,0);
-	}
-
-	player.down = function(){
-		player.move(0,1);
-	}
-
-	gameSetup(game);
-	play(map);
 }
 
-
+// MAP VIEW
 function updateMapView(){
+	playerPosition = game.player.pos;
 	for (i = 0; i < game.mapView.x; i++){
 		for (j = 0; j < game.mapView.y; j++){
 			here = new Vec2(i,j);
-			current = here.cell();
+			current = here.getCell();
 			current.attr('class', 'mapCell');
 			// Cell logic
-			if(player.pos.x == i && player.pos.y == j){
+			if(playerPosition.x == i && playerPosition.y == j){
 				current.text("@");
 			}else{
-				current.text(map.get(here).symbol);
+				t = map.getTile(here).symbol;
+				if(t == 'Y'){ current.addClass('wall') };
+				current.text(t);
 			}
 
-			d = player.pos.distanceTo(here);
+			d = playerPosition.distanceTo(here);
 			if(d <= 1) {
 				current.addClass('canMoveCell');
 			}
 		}
 	}
-	cameraTo(player.pos.x, player.pos.y);
+	cameraTo(playerPosition);
+}
+
+//UTILITY
+class Dice {
+	constructor(sides){
+		this.sides = sides;
+	}
+  roll() {
+    var randomNumber = Math.floor(Math.random() * this.sides) + 1;
+    return randomNumber;
+  }
+
 }
 
 // Map
 class GameMap extends Array{
+
 	constructor(x,y){
 		super();
-		for (var i = 0; i < x; i++) {
-			this[i] = new Array();
-			for (var j = 0; j < y; j++) {
-				this[i][j] = new Tile('x');
+		this.x = x;
+		this.y = y;
+		// this.startingMap(x,y,this.getRandomTile);
+		this.startingMap(x,y,function(){return new Tile(' ')});
+		// this.arenaMap(x,y,this);
+		this.dungeonMap(x,y,this);
+		// this.startingMap(x,y,);
+		this.downstairs = false;
+		var freeTiles = this.listFreeTiles();
+		for (var i = freeTiles.length - 1; i >= 0; i--) {
+			var v = freeTiles[i];
+			v.getCell().css('background-color','red');
+		}
+		player.pos = freeTiles[new Dice(freeTiles.length).roll()];
+
+	}
+
+
+	listFreeTiles(){
+		return this.listTilesCondition(function(tile){
+			if(tile.symbol == ' '){
+				return true;
+			}
+			return false;
+		});
+	}
+
+	// WIP
+	listTilesCondition(conditionFunction){
+		var list = new Array();
+		for (var ix = 0; ix < this.x; ix++) {
+			for (var jy = 0; jy < this.y; jy++) {
+				if(conditionFunction(this[ix][jy])){
+					list.push(new Vec2(ix,jy));
+				}
+			}
+		}
+		return list;
+	}
+
+	userCallback(scope){
+		return function(x, y, value) {
+			// SHOW(ROT.Util.format("Value %s generated at [%s,%s]", value, x, y));
+			console.log(" X: " + x + " Y: " + y + "Value: " + value);
+			if(value){
+				scope[x][y] = new Wall('Y');
+			} else {
+				scope[x][y] = scope.getRandomTile(scope);
 			}
 		}
 	}
 
-	get(v){
-		return this[v.x][v.y];
+	arenaMap(x,y,scope){
+		var ROTMap = new ROT.Map.Arena(x, y);
+		ROTMap.create(scope.userCallback(scope));
 	}
+
+	dungeonMap(x,y,scope){
+		ROT.RNG.setSeed(1234);
+		var DMap = new ROT.Map.Digger(x,y);
+
+		var addDoor = function(x, y) {
+		    scope[x][y] = new Door('D');
+		}
+
+		var rooms = DMap.getRooms();
+		for (var i=0; i<rooms.length; i++) {
+		    var room = rooms[i];
+		    SHOW(ROT.Util.format("Room #%s: [%s, %s] => [%s, %s]",
+		        (i+1),
+		        room.getLeft(), room.getTop(),
+		        room.getRight(), room.getBottom()
+		    ));
+
+		    room.getDoors(addDoor);
+		}
+		DMap.create(scope.userCallback(scope));
+	}
+
+	startingMap(x,y, createTileFunc){
+		// Build Map
+		for (var i = 0; i < x; i++) {
+			this[i] = new Array();
+			for (var j = 0; j < y; j++) {
+				this[i][j] = createTileFunc(this);
+			}
+		}
+	}
+
+	getRandomTile(scope){
+		var t;
+		var n = new Dice(20).roll();
+		switch(n){
+			case 1: t = new Chest('c');break;
+			case 2: t = new Monster('e');break;
+			case 3: if(!scope.downstairs){
+				t = new Stairs('>');
+				scope.downstairs = true;
+			} else {
+				t = new Tile(' ');
+			}; break;
+			case 4: t = new Wall(' ');
+			default: t = new Tile(' ');
+		}
+		return t;
+	}
+
+	getTile(v){
+		if(this.inBounds(v)){
+			return this[v.x][v.y];
+		} else {
+			return new Wall('x');
+		}
+	}
+
+	inBounds(v){
+		if(v.x < 0 || v.y < 0 || v.x >= this.x || v.y >= this.y){
+			return false;
+		}else {
+			return true;
+		}
+	}
+
 }
 
 class Tile{
 	constructor(symbol){
+		this.type = 'tile';
 		this.symbol = symbol;
+		this.passable = true;
+		this.encounter = false;
+		this.class = '';
+	}
+}
+
+class Monster extends Tile{
+	constructor(symbol){
+		super(symbol);
+		this.type = 'Monster';
+		this.passable = false;
+		this.encounter = true;
+	}
+
+	runEncounter(){
+
+	}
+}
+
+class Door extends Tile{
+	constructor(symbol){
+		super(symbol);
+		this.type = 'door';
+		this.passable = false;
+		this.encounter = true;
+	}
+
+	runEncounter(){
+		console.log('you walk into a door');
+	}
+}
+
+class Stairs extends Tile{
+	constructor(symbol){
+		super(symbol);
+		this.type = 'stairs';
+		this.passable = true;
+		this.encounter = true;
+	}
+
+	runEncounter(){
+		alert('You WIN!');
+	}
+}
+
+class Chest extends Tile{
+	constructor(symbol){
+		super(symbol);
+		this.type = 'chest';
+		this.passable = false;
+	}	
+}
+
+class Wall extends Tile{
+	constructor(symbol){
+		super(symbol);
+		this.passable = false;
+		this.class = 'wall';
 	}
 }
 
@@ -388,27 +564,72 @@ class Vec2 {
 		return Math.pow(dx,2) + Math.pow(dy,2);
 	}
 
-	cell(){
+	getCell(){
 		return $('#cell_' + this.x + '_' + this.y);
 	}
 }
 
 // center view on square x,y
-function cameraTo(x,y){
+function cameraTo(v){
+	x = v.x;
+	y = v.y;
 	spacing = {};
 	spacing.initialOffset = {};
-	spacing.initialOffset.x = 149;
-	spacing.initialOffset.y = 200;
 	spacing.x = -96;
-	spacing.y = -96;
+	spacing.y = spacing.x;
+	spacing.initialOffset.x = ($(window).width() + spacing.x)/2;
+	spacing.initialOffset.y = ($(window).height() + spacing.y)/2;
+
 	$('#map').css({'left': x*spacing.x + spacing.initialOffset.x + 'px',
 		'top': y*spacing.y + spacing.initialOffset.y + 'px'});
 }
 
 function gameSetup(game){
-	player = game.player;
+
 	map = new GameMap(50,50);
 	buildMapView(50, 50);
+
+	game.player = player;
+	
+	player.pos = new Vec2(new Dice(map.x - 1).roll(), new Dice(map.y - 1).roll());
+
+	game.redraw = function(){
+		updateMapView();
+		// TODO: update UI/draw UI
+	}
+
+
+	// First draw!
+	game.redraw();
+
+	player.move = function(v){
+		movingTo = new Vec2(player.pos.x + v.x,player.pos.y + v.y);
+		t = map.getTile(movingTo);
+		if(t.passable){
+			player.pos = movingTo
+			// Incremenet move counter?
+		} 
+		if(t.encounter) {
+			t.runEncounter();
+		}
+		game.redraw();
+	}
+
+	player.left = function(){
+		player.move(new Vec2(-1,0));
+	}
+
+	player.up = function(){
+		player.move(new Vec2(0,-1));
+	}
+
+	player.right = function(){
+		player.move(new Vec2(1,0));
+	}
+
+	player.down = function(){
+		player.move(new Vec2(0,1));
+	}
 
 	// Bind Keys
 	$(document).keydown(function(e) {
@@ -440,7 +661,7 @@ game.mapView = {};
 game.mapView.x = x;
 game.mapView.y = y;
 
-	for (iy = 0; iy < y; iy++){
+	for (var iy = 0; iy < y; iy++){
 		var myRow = $('<div></div>');
 		myRow.attr('id', 'row_' + iy);
 		myRow.addClass('row');
@@ -530,15 +751,6 @@ function quickType(str, target, i, callback) {
       if(callback)
         callback();
     }
-}
-
-
-function XOR(a, b){
-	return	( a || b ) && !( a && b )
-}
-
-function AND(a, b){
-	return	( a || b ) && !( a && b )
 }
 
 </script>
