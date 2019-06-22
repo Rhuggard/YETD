@@ -36,7 +36,7 @@
 	}
 
 	#begin span{
-		background: black;
+			background: black;
 	    position: relative;
 	    top: 13px;
 	    padding: 15px;
@@ -202,6 +202,16 @@
   	color:red;
   }
 
+  .death{
+  	animation-name: dying;
+  	animation-duration: 1s;
+  }
+
+  @-webkit-keyframes dying {
+	  from {background-color: red;}
+	  to {background-color: white;}
+	}
+
 
 </style>
 
@@ -312,14 +322,12 @@ var player = {};
 class game{
 	constructor(){
 			gameSetup(game);
-			play(map);		
 	}
-
 }
 
 // MAP VIEW
 function updateMapView(){
-	playerPosition = game.player.pos;
+	playerPosition = player.pos;
 	for (i = 0; i < game.mapView.x; i++){
 		for (j = 0; j < game.mapView.y; j++){
 			here = new Vec2(i,j);
@@ -368,12 +376,16 @@ class GameMap extends Array{
 		this.dungeonMap(x,y,this);
 		// this.startingMap(x,y,);
 		this.downstairs = false;
+
 		var freeTiles = this.listFreeTiles();
 		for (var i = freeTiles.length - 1; i >= 0; i--) {
 			var v = freeTiles[i];
 			v.getCell().css('background-color','red');
 		}
-		player.pos = freeTiles[new Dice(freeTiles.length).roll()];
+		player.pos = new Vec2(25,25);
+		// player.pos = new Vec2(new Dice(this.x - 1).roll(), new Dice(this.y - 1).roll());
+		// var startPos = freeTiles[new Dice(freeTiles.length).roll()];
+		// player.pos = new Vec2(startPos.x,startPos.y);
 
 	}
 
@@ -490,8 +502,11 @@ class Tile{
 		this.type = 'tile';
 		this.symbol = symbol;
 		this.passable = true;
-		this.encounter = false;
 		this.class = '';
+	}
+
+	runEncounter(){
+		// Abstract for when player collides
 	}
 }
 
@@ -500,11 +515,11 @@ class Monster extends Tile{
 		super(symbol);
 		this.type = 'Monster';
 		this.passable = false;
-		this.encounter = true;
 	}
 
 	runEncounter(){
-
+		this.class = 'death';
+		this.passable = true;
 	}
 }
 
@@ -513,7 +528,6 @@ class Door extends Tile{
 		super(symbol);
 		this.type = 'door';
 		this.passable = false;
-		this.encounter = true;
 	}
 
 	runEncounter(){
@@ -526,7 +540,6 @@ class Stairs extends Tile{
 		super(symbol);
 		this.type = 'stairs';
 		this.passable = true;
-		this.encounter = true;
 	}
 
 	runEncounter(){
@@ -539,7 +552,12 @@ class Chest extends Tile{
 		super(symbol);
 		this.type = 'chest';
 		this.passable = false;
-	}	
+	}
+
+	runEncounter(){
+		this.class = 'loot';
+		this.passable = true;
+	}
 }
 
 class Wall extends Tile{
@@ -609,9 +627,7 @@ function gameSetup(game){
 			player.pos = movingTo
 			// Incremenet move counter?
 		} 
-		if(t.encounter) {
-			t.runEncounter();
-		}
+		t.runEncounter();
 		game.redraw();
 	}
 
@@ -675,21 +691,6 @@ game.mapView.y = y;
 	}
 }
 
-function play(map){
-// TODO:
-}
-
-function showMap(map){
-	mapStr = "";
-	for(i = 0; i < map.length; i++ ){
-		for(j = 0; j < map[i].length; j++){
-			mapStr += map[i][j];
-		}
-		mapStr += '\n';
-	}
-	return mapStr;
-}
-
 // UTILTITIES
 
 // Typing delays in milliseconds.
@@ -733,7 +734,6 @@ function rpgText(element, heading, body){
 			unFixDimensions(element);
     });
   };
-
 }
 
 function typeWriter(str, target, callback){
