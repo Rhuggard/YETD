@@ -295,7 +295,7 @@ $(document).ready(function(){
 		rpgText($("#OpeningScreen .textWrapper"), null, $("#OpeningScreen #secondText"));
 		$(this).unbind('click');
 		$( "#OpeningScreen .rhsTapLine span").text("Close");
-		$(this).click(third);
+		$(this).one("click",third);
 	});
 
 	function third(){
@@ -607,9 +607,7 @@ function gameSetup(game){
 	map = new GameMap(50,50);
 	buildMapView(50, 50);
 
-	game.player = player;
-	
-	player.pos = new Vec2(new Dice(map.x - 1).roll(), new Dice(map.y - 1).roll());
+
 
 	game.redraw = function(){
 		updateMapView();
