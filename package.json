@@ -1,0 +1,15 @@
+{
+  "name": "lars-protox",
+  "version": "1.0.0",
+  "description": "wibble",
+  "main": "index.js",
+  "dependencies": {
+    "sass": "^1.22.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC"
+}

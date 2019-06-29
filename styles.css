@@ -1,0 +1,171 @@
+@font-face {
+  font-family: norwester;
+  src: url("norwester.otf") format("opentype"); }
+@font-face {
+  font-family: yetd;
+  src: url("YETD_Font.ttf") format("truetype"); }
+body {
+  background-color: black;
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  font-family: norwester;
+  color: white;
+  font-size: 20px;
+  overflow: hidden; }
+
+/**/
+#begin {
+  border-bottom: 4px solid #CC3333;
+  width: 100%; }
+
+#begin span {
+  background: black;
+  position: relative;
+  top: 13px;
+  padding: 15px; }
+
+/**/
+.rhsTapLine {
+  border-bottom: 4px solid #CC3333;
+  width: 100%;
+  position: relative;
+  transition: right ease-in-out 0.1s;
+  /*For non fullscreen slide out animations*/
+  right: 0px; }
+
+.rhsTapLine .rhsText {
+  background: black;
+  position: absolute;
+  top: -35px;
+  padding: 15px;
+  right: 15px;
+  font-size: 33px; }
+
+.rhsTapLine .lhsText {
+  background: black;
+  position: absolute;
+  top: -34px;
+  padding: 11px;
+  left: 12px;
+  font-size: 16px; }
+
+#wrapper {
+  text-align: center;
+  width: 100%;
+  height: 100%; }
+
+#title {
+  color: white;
+  display: inline-block;
+  height: 55%; }
+
+.simpleImage {
+  width: 100%;
+  top: 33%;
+  position: relative; }
+
+.graveYard {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 80px;
+  transform: translateX(-40px); }
+
+/* each screen has this class */
+.screen {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  right: 0%;
+  top: 0%;
+  transition: right ease-in-out 0.1s; }
+
+.exit {
+  right: 100%; }
+
+.offScreen {
+  right: -100%; }
+
+.textScreenHeading {
+  padding-top: 30px;
+  padding: 15px;
+  font-size: 22px;
+  text-align: left; }
+
+.textScreenBody {
+  text-align: left;
+  padding: 15px 25px 15px 15px;
+  font-size: 19px; }
+
+.textDisplay {
+  height: 40%;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 30px; }
+
+.textWrapper {
+  position: absolute;
+  bottom: 0px; }
+
+.mapCell.wall {
+  color: black;
+  border: 4px solid transparent; }
+
+/* GAME STUFF*/
+#gameScreen {
+  background-color: black; }
+
+.mapCell {
+  text-align: center;
+  line-height: 80px;
+  font-size: 60px;
+  font-family: 'yetd';
+  /* position: absolute; */
+  border: 4px solid white;
+  opacity: 0.6;
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  min-height: 80px;
+  display: inline-block;
+  margin: 4px; }
+
+#mapWrapper {
+  height: 60%;
+  width: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  text-align: initial; }
+
+#map {
+  width: 10000px;
+  height: 10000px;
+  overflow: hidden;
+  left: 0px;
+  position: relative;
+  top: 0px;
+  transition: 0.1s ease-in-out; }
+
+.row {
+  display: flex; }
+
+.canMoveCell {
+  border-color: white;
+  opacity: 1.0; }
+
+.fail {
+  color: red; }
+
+.death {
+  animation-name: dying;
+  animation-duration: 1s; }
+
+@-webkit-keyframes dying {
+  from {
+    background-color: red; }
+  to {
+    background-color: white; } }
+
+/*# sourceMappingURL=styles.css.map */
