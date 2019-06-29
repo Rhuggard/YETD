@@ -309,9 +309,6 @@ $(document).ready(function(){
 				$(this).addClass('exit');
 			});
 		}
-
-		//Third Screen
-
 });
 
 
@@ -330,21 +327,20 @@ function updateMapView(){
 	playerPosition = player.pos;
 	for (i = 0; i < game.mapView.x; i++){
 		for (j = 0; j < game.mapView.y; j++){
-			here = new Vec2(i,j);
-			current = here.getCell();
-			current.attr('class', 'mapCell');
+			cell = new Vec2(i,j);
+			cell.setClass('mapCell');
 			// Cell logic
 			if(playerPosition.x == i && playerPosition.y == j){
-				current.text("@");
+				cell.setSymbol("@");
 			}else{
-				t = map.getTile(here).symbol;
-				if(t == 'Y'){ current.addClass('wall') };
-				current.text(t);
+				t = map.getTile(cell).symbol;
+				if(t == 'Y'){ cell.addClass('wall') };
+				cell.setSymbol(t);
 			}
 
-			d = playerPosition.distanceTo(here);
+			d = playerPosition.distanceTo(cell);
 			if(d <= 1) {
-				current.addClass('canMoveCell');
+				cell.addClass('canMoveCell');
 			}
 		}
 	}
@@ -380,13 +376,11 @@ class GameMap extends Array{
 		var freeTiles = this.listFreeTiles();
 		for (var i = freeTiles.length - 1; i >= 0; i--) {
 			var v = freeTiles[i];
-			v.getCell().css('background-color','red');
+			v.getCellReference().css('background-color','red');
 		}
-		player.pos = new Vec2(25,25);
-		// player.pos = new Vec2(new Dice(this.x - 1).roll(), new Dice(this.y - 1).roll());
-		// var startPos = freeTiles[new Dice(freeTiles.length).roll()];
-		// player.pos = new Vec2(startPos.x,startPos.y);
 
+		player.pos = freeTiles[new Dice(freeTiles.length).roll()];
+		buildMapView(x, y); //TODO: Perhaps only show part of the map
 	}
 
 
@@ -415,7 +409,7 @@ class GameMap extends Array{
 	userCallback(scope){
 		return function(x, y, value) {
 			// SHOW(ROT.Util.format("Value %s generated at [%s,%s]", value, x, y));
-			console.log(" X: " + x + " Y: " + y + "Value: " + value);
+			// console.log(" X: " + x + " Y: " + y + "Value: " + value);
 			if(value){
 				scope[x][y] = new Wall('Y');
 			} else {
@@ -568,6 +562,11 @@ class Wall extends Tile{
 	}
 }
 
+// Cache cell references as they rarely change and take a while to lookup
+lookupCache = {};
+// For performance testing and debugging caching
+forceCacheOff = false;
+
 // Vector Helpers
 class Vec2 {
 
@@ -576,14 +575,40 @@ class Vec2 {
 		this.y = y;
 	}
 
+	toString(){
+		return " x: " + this.x + " y: " + this.y;
+	}
+
 	distanceTo(v){
 		var dx = v.x - this.x;
 		var dy = v.y - this.y;
 		return Math.pow(dx,2) + Math.pow(dy,2);
 	}
 
-	getCell(){
-		return $('#cell_' + this.x + '_' + this.y);
+	setClass(c){
+		this.getCellReference().attr('class', c);
+	}
+
+	cacheLookup(s){
+		var key = s;
+		var value = lookupCache[key];
+		if(value == undefined || forceCacheOff){
+			value = $(key);
+			lookupCache[key] = value;
+		}
+		return value;
+	}
+
+	setSymbol(s){
+		this.cacheLookup('#cell_' + this.x + '_' + this.y + ' .symbol').text(s);
+	}
+
+	addClass(c){
+		this.getCellReference().addClass(c);
+	}
+
+	getCellReference(){
+		return this.cacheLookup('#cell_' + this.x + '_' + this.y );
 	}
 }
 
@@ -605,18 +630,9 @@ function cameraTo(v){
 function gameSetup(game){
 
 	map = new GameMap(50,50);
-	buildMapView(50, 50);
-
-
-
-	game.redraw = function(){
-		updateMapView();
-		// TODO: update UI/draw UI
-	}
-
 
 	// First draw!
-	game.redraw();
+	updateMapView();
 
 	player.move = function(v){
 		movingTo = new Vec2(player.pos.x + v.x,player.pos.y + v.y);
@@ -626,7 +642,7 @@ function gameSetup(game){
 			// Incremenet move counter?
 		} 
 		t.runEncounter();
-		game.redraw();
+		updateMapView();
 	}
 
 	player.left = function(){
@@ -664,6 +680,10 @@ function gameSetup(game){
 	        player.down();
 	        break;
 
+	        case 13: //enter
+	        map.
+	        break;
+
 	        default: return; // exit this handler for other keys
 	    }
 	    e.preventDefault(); // prevent the default action (scroll / move caret)
@@ -681,7 +701,7 @@ game.mapView.y = y;
 		myRow.addClass('row');
 		$("#map").append(myRow);
 		for (jx = 0; jx < x; jx++){
-			var myCell = $('<div></div>');
+			var myCell = $('<div><span class="symbol"></symbol><div class="fx"></div></div>');
 			myCell.attr('id', 'cell_' + jx + '_' + iy);
 			myCell.addClass('mapCell');
 			$("#row_" + iy).append(myCell);
