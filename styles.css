@@ -14,16 +14,68 @@ body {
   font-size: 20px;
   overflow: hidden; }
 
+.tapSquareAnimation {
+  height: 0px;
+  width: 0px;
+  align-self: center;
+  justify-content: center;
+  right: 50%;
+  display: flex;
+  position: absolute; }
+  .tapSquareAnimation .ts1.animate {
+    border: none;
+    width: 100px;
+    height: 100px;
+    transform: rotate(45deg);
+    position: absolute;
+    justify-self: center;
+    align-self: center;
+    animation: ts1anim 0.3s; }
+  .tapSquareAnimation .ts2.animate {
+    border: none;
+    width: 100px;
+    height: 100px;
+    transform: rotate(45deg);
+    position: absolute;
+    justify-self: center;
+    align-self: center;
+    animation: ts2anim 0.3s; }
+
+.centerLine span {
+  top: 14px; }
+
+@keyframes ts1anim {
+  0% {
+    width: 10px;
+    height: 10px;
+    border: 3px solid white; }
+  80% {
+    width: 100px;
+    height: 100px;
+    border: 3px solid white; }
+  100% {
+    width: 100px;
+    height: 100px;
+    border: 3px solid white; } }
+@keyframes ts2anim {
+  20% {
+    width: 10px;
+    height: 10px;
+    border: 1px solid white; }
+  100% {
+    width: 100px;
+    height: 100px;
+    border: 1px solid white; } }
 /**/
 #begin {
   border-bottom: 4px solid #CC3333;
   width: 100%; }
-
-#begin span {
-  background: black;
-  position: relative;
-  top: 13px;
-  padding: 15px; }
+  #begin span {
+    background: black;
+    position: relative;
+    bottom: -30px;
+    padding: 15px;
+    display: inline-flex; }
 
 /**/
 .rhsTapLine {
@@ -79,7 +131,7 @@ body {
   position: absolute;
   right: 0%;
   top: 0%;
-  transition: right ease-in-out 0.1s; }
+  transition: right ease-in-out 0.2s 0.4s; }
 
 .exit {
   right: 100%; }
@@ -162,7 +214,7 @@ body {
   animation-name: dying;
   animation-duration: 1s; }
 
-@-webkit-keyframes dying {
+@keyframes dying {
   from {
     background-color: red; }
   to {
