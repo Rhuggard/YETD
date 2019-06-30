@@ -41,9 +41,18 @@ body {
     align-self: center;
     animation: ts2anim 0.3s; }
 
-.centerLine span {
-  top: 14px; }
+.centerLine .tapText {
+  animation: startTextanim 0.4; }
+  .centerLine .tapText.animate {
+    animation: tapTextanim 0.3s; }
 
+@keyframes tapTextanim {
+  0% {
+    transform: scale(1); }
+  50% {
+    transform: scale(1.3); }
+  100% {
+    transform: scale(1); } }
 @keyframes ts1anim {
   0% {
     width: 10px;
@@ -68,15 +77,31 @@ body {
     border: 1px solid white; } }
 /**/
 #begin {
-  border-bottom: 4px solid #CC3333;
   width: 100%; }
-  #begin span {
-    background: black;
+  #begin .tapText {
+    /* background: black; */
     position: relative;
     bottom: -30px;
     padding: 15px;
-    display: inline-flex; }
+    display: block;
+    position: relative;
+    top: -26px; }
+  #begin .redline {
+    border-bottom: 4px solid #CC3333; }
+    #begin .redline.redline-left {
+      width: 30%;
+      float: left;
+      animation: growWidth 1s; }
+    #begin .redline.redline-right {
+      width: 30%;
+      float: right;
+      animation: growWidth 1s; }
 
+@keyframes growWidth {
+  0% {
+    width: 0%; }
+  100% {
+    widht: 30%; } }
 /**/
 .rhsTapLine {
   border-bottom: 4px solid #CC3333;

@@ -23,15 +23,15 @@
 		<img class='simpleImage' src='Title.png'>
 	</div>
 	<div id='begin'>
-		<span></span>
+		<div class='redline redline-left'></div>
+		<div class='redline redline-right'></div>
 		<span class='centerLine'>
 			<div class='tapSquareAnimation'>
 				<div class='ts1'></div>
 				<div class='ts2'></div>
 			</div>
-			<span>TAP TO BEGIN</span>
+			<span class='tapText'>TAP TO BEGIN</span>
 		</span>
-		<span></span>
 	</div>
 	<img class='graveYard' src='Graveyard.png'>
 </div>
@@ -86,6 +86,7 @@ $(document).ready(function(){
 	$( "#begin" ).click(function() {
 	  $("#begin .tapSquareAnimation .ts1").addClass('animate');
 	  $("#begin .tapSquareAnimation .ts2").addClass('animate');
+	  $("#begin .tapText").addClass('animate');
 
 	  $("#TitleScreen").addClass( "exit");
 	  $("#OpeningScreen").removeClass( "offScreen");
