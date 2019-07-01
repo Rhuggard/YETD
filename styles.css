@@ -91,17 +91,23 @@ body {
     #begin .redline.redline-left {
       width: 30%;
       float: left;
-      animation: growWidth 1s; }
+      animation: growWidth 0.3s; }
     #begin .redline.redline-right {
       width: 30%;
       float: right;
-      animation: growWidth 1s; }
+      animation: growWidth 0.3s; }
 
 @keyframes growWidth {
   0% {
     width: 0%; }
   100% {
-    widht: 30%; } }
+    width: 30%; }
+  }
+
+@keyframes growText {
+  0% {transform: scaleY(0);}
+  100% {transform: scaleY(1);}
+}
 /**/
 .rhsTapLine {
   border-bottom: 4px solid #CC3333;
